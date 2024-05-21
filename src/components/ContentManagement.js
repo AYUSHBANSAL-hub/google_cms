@@ -9,6 +9,7 @@ const ContentManagement = () => {
   const { contents, loading } = useSelector(state => state.content);
 
   const [formData, setFormData] = useState({
+    id: null,
     imageUrl: '',
     link: '',
     order: '',
@@ -34,18 +35,28 @@ const ContentManagement = () => {
       route: formData.route
     };
     dispatch(addContent(newContent));
-    setFormData({ imageUrl: '', link: '', order: '', route: '' });
+    setFormData({ id: null, imageUrl: '', link: '', order: '', route: '' });
   };
 
-  const handleUpdate = (id) => {
+  const handleUpdate = () => {
     const updatedContent = {
       imageUrl: formData.imageUrl,
       link: formData.link,
       order: Number(formData.order),
       route: formData.route
     };
-    dispatch(updateContent(id, updatedContent));
-    setFormData({ imageUrl: '', link: '', order: '', route: '' });
+    dispatch(updateContent(formData.id, updatedContent));
+    setFormData({ id: null, imageUrl: '', link: '', order: '', route: '' });
+  };
+
+  const handleEditClick = (content) => {
+    setFormData({
+      id: content.id,
+      imageUrl: content.imageUrl,
+      link: content.link,
+      order: content.order,
+      route: content.route
+    });
   };
 
   const handleDelete = (id) => {
@@ -107,7 +118,11 @@ const ContentManagement = () => {
           value={formData.route}
           onChange={handleChange}
         />
-        <button className="add-button" onClick={handleAdd}>Add Content</button>
+        {formData.id ? (
+          <button className="update-button" onClick={handleUpdate}>Update Content</button>
+        ) : (
+          <button className="add-button" onClick={handleAdd}>Add Content</button>
+        )}
       </div>
 
       <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -115,7 +130,7 @@ const ContentManagement = () => {
           {(provided) => (
             <div className="contents-grid" {...provided.droppableProps} ref={provided.innerRef}>
               {sortedContents.map((content, index) => (
-                <Draggable key={content.id} draggableId={content.id} index={index}>
+                <Draggable key={content.id} draggableId={content.id.toString()} index={index}>
                   {(provided) => (
                     <div
                       ref={provided.innerRef}
@@ -126,7 +141,7 @@ const ContentManagement = () => {
                       <img src={content.imageUrl} alt={content.link} />
                       <p className="legend">{content.link}</p>
                       <div className="button-group">
-                        <button className="update-button" onClick={() => handleUpdate(content.id)}>Update</button>
+                        <button className="edit-button" onClick={() => handleEditClick(content)}>Edit</button>
                         <button className="delete-button" onClick={() => handleDelete(content.id)}>Delete</button>
                       </div>
                     </div>
@@ -143,4 +158,3 @@ const ContentManagement = () => {
 };
 
 export default ContentManagement;
-

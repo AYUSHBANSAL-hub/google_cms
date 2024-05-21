@@ -1,103 +1,107 @@
 .content-management {
-    padding: 20px;
-    max-width: 1200px;
-    margin: auto;
-  }
-  
-  .title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2em;
-    color: #333;
-  }
-  
-  .input-section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  
-  .input-section input {
-    margin: 5px;
-    padding: 10px;
-    width: 100%;
-    max-width: 250px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .add-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .add-button:hover {
-    background-color: #45a049;
-  }
-  
-  .contents-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-  }
-  
-  .grid-item {
-    position: relative;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    text-align: center;
-  }
-  
-  .grid-item img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .legend {
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-  }
-  
-  .update-button, .delete-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .update-button {
-    background-color: #2196F3;
-    color: white;
-  }
-  
-  .update-button:hover {
-    background-color: #0b7dda;
-  }
-  
-  .delete-button {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .delete-button:hover {
-    background-color: #da190b;
-  }
-  
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2em;
+  color: #333;
+}
+
+.input-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.input-section input {
+  margin: 5px;
+  padding: 10px;
+  width: 100%;
+  max-width: 250px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  background-color: #45a049;
+}
+
+.contents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.grid-item {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 250px; /* Adjust this height to fit the image and buttons */
+}
+
+.grid-item img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  flex-grow: 1;
+}
+
+.legend {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.update-button, .delete-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.update-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #0b7dda;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #da190b;
+}
