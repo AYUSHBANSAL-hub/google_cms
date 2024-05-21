@@ -1,100 +1,103 @@
 .content-management {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     padding: 20px;
-    font-family: 'Arial, sans-serif';
-    background-color: #f5f5f5;
+    max-width: 1200px;
+    margin: auto;
   }
   
   .title {
-    font-size: 2rem;
-    color: #333;
+    text-align: center;
     margin-bottom: 20px;
+    font-size: 2em;
+    color: #333;
   }
   
   .input-section {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
     margin-bottom: 20px;
-    width: 100%;
-    max-width: 600px;
   }
   
   .input-section input {
-    margin: 10px 0;
+    margin: 5px;
     padding: 10px;
     width: 100%;
+    max-width: 250px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 1rem;
   }
   
-  .input-section button {
-    margin-top: 10px;
+  .add-button {
     padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #007bff;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
   }
   
-  .input-section button:hover {
-    background-color: #0056b3;
+  .add-button:hover {
+    background-color: #45a049;
   }
   
-  .carousel {
-    width: 100%;
-    max-width: 800px;
+  .contents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
   }
   
-  .carousel-item {
+  .grid-item {
     position: relative;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    text-align: center;
   }
   
-  .carousel-item img {
-    width: 100%;
-    border-radius: 8px;
+  .grid-item img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 10px;
   }
   
   .legend {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 10px;
-    border-radius: 0 0 8px 8px;
-    text-align: center;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
   }
   
   .button-group {
     display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
+    justify-content: space-between;
+    padding: 10px 0;
   }
   
-  .button-group button {
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    background-color: #28a745;
-    color: white;
+  .update-button, .delete-button {
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
   }
   
-  .button-group button:hover {
-    background-color: #218838;
+  .update-button {
+    background-color: #2196F3;
+    color: white;
   }
   
-  .button-group button:last-child {
-    background-color: #dc3545;
+  .update-button:hover {
+    background-color: #0b7dda;
   }
   
-  .button-group button:last-child:hover {
-    background-color: #c82333;
+  .delete-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .delete-button:hover {
+    background-color: #da190b;
   }
   
