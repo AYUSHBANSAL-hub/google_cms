@@ -1,29 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getContents, addContent, updateContent, deleteContent } from '../actions';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import './ContentManagement.css';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getContents,
+  addContent,
+  updateContent,
+  deleteContent,
+  setContentsNULL,
+  getContentsWithLink,
+} from "../actions";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import "./ContentManagement.css";
+import Avatar from "react-avatar";
+import { motion } from "framer-motion";
 
 const ContentManagement = () => {
   const dispatch = useDispatch();
-  const { contents, loading } = useSelector(state => state.content);
-
+  const { contents, loading } = useSelector((state) => state.content);
+  const [path, setPath] = useState(["your-collection"]);
   const [formData, setFormData] = useState({
     id: null,
-    imageUrl: '',
-    link: '',
-    order: '',
-    route: ''
+    imageUrl: "",
+    link: "",
+    order: "",
+    route: "",
   });
 
   useEffect(() => {
     dispatch(getContents());
   }, [dispatch]);
 
+  const handleCollectionClick = (contentId) => {
+    const newPath = [...path, contentId];
+    setPath(newPath);
+    dispatch(setContentsNULL());
+    dispatch(getContentsWithLink(newPath)).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -31,11 +49,11 @@ const ContentManagement = () => {
     const newContent = {
       imageUrl: formData.imageUrl,
       link: formData.link,
-      order: contents.length, 
-      route: formData.route
+      order: contents ? contents.length : 0,
+      route: formData.route,
     };
     dispatch(addContent(newContent));
-    setFormData({ id: null, imageUrl: '', link: '', order: '', route: '' });
+    setFormData({ id: null, imageUrl: "", link: "", order: "", route: "" });
   };
 
   const handleUpdate = () => {
@@ -43,10 +61,10 @@ const ContentManagement = () => {
       imageUrl: formData.imageUrl,
       link: formData.link,
       order: Number(formData.order),
-      route: formData.route
+      route: formData.route,
     };
     dispatch(updateContent(formData.id, updatedContent));
-    setFormData({ id: null, imageUrl: '', link: '', order: '', route: '' });
+    setFormData({ id: null, imageUrl: "", link: "", order: "", route: "" });
   };
 
   const handleEditClick = (content) => {
@@ -55,7 +73,7 @@ const ContentManagement = () => {
       imageUrl: content.imageUrl,
       link: content.link,
       order: content.order,
-      route: content.route
+      route: content.route,
     });
   };
 
@@ -71,8 +89,8 @@ const ContentManagement = () => {
     reorderedContents.splice(result.destination.index, 0, reorderedItem);
 
     dispatch({
-      type: 'GET_CONTENTS',
-      payload: reorderedContents
+      type: "GET_CONTENTS",
+      payload: reorderedContents,
     });
 
     reorderedContents.forEach((content, index) => {
@@ -84,11 +102,36 @@ const ContentManagement = () => {
     return <div>Loading...</div>;
   }
 
+  if (!contents || !Array.isArray(contents)) {
+    return <div>Error fetching data.</div>;
+  }
+
   const sortedContents = [...contents].sort((a, b) => a.order - b.order);
 
   return (
     <div className="content-management">
       <h1 className="title">Content Management</h1>
+      <div className="grid_box">
+        {sortedContents.map((content, index) => (
+          <motion.div
+            className="content_collections"
+            key={index}
+            whileHover={{ scale: 1.05 }}
+            onClick={() => handleCollectionClick(content.id)}
+          >
+            <Avatar
+              className="avatar"
+              name={content.id}
+              size="100"
+              round={true}
+              style={{ backgroundColor: "#333" }}
+            />
+            <div>
+              <p style={{ color: "black", fontFamily: "bold" }}>{content.id}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
       <div className="input-section">
         <input
           type="text"
@@ -119,18 +162,30 @@ const ContentManagement = () => {
           onChange={handleChange}
         />
         {formData.id ? (
-          <button className="update-button" onClick={handleUpdate}>Update Content</button>
+          <button className="update-button" onClick={handleUpdate}>
+            Update Content
+          </button>
         ) : (
-          <button className="add-button" onClick={handleAdd}>Add Content</button>
+          <button className="add-button" onClick={handleAdd}>
+            Add Content
+          </button>
         )}
       </div>
 
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <Droppable droppableId="contents" direction="horizontal">
           {(provided) => (
-            <div className="contents-grid" {...provided.droppableProps} ref={provided.innerRef}>
+            <div
+              className="contents-grid"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
               {sortedContents.map((content, index) => (
-                <Draggable key={content.id} draggableId={content.id.toString()} index={index}>
+                <Draggable
+                  key={content.id}
+                  draggableId={content.id.toString()}
+                  index={index}
+                >
                   {(provided) => (
                     <div
                       ref={provided.innerRef}
@@ -141,8 +196,18 @@ const ContentManagement = () => {
                       <img src={content.imageUrl} alt={content.link} />
                       <p className="legend">{content.link}</p>
                       <div className="button-group">
-                        <button className="edit-button" onClick={() => handleEditClick(content)}>Edit</button>
-                        <button className="delete-button" onClick={() => handleDelete(content.id)}>Delete</button>
+                        <button
+                          className="edit-button"
+                          onClick={() => handleEditClick(content)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDelete(content.id)}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   )}
