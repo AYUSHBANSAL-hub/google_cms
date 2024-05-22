@@ -5,6 +5,8 @@ import {
   addContent,
   updateContent,
   deleteContent,
+  setContentsNULL,
+  getContentsWithLink,
 } from "../actions";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./ContentManagement.css";
@@ -14,7 +16,8 @@ import {motion} from "framer-motion";
 const ContentManagement = () => {
   const dispatch = useDispatch();
   const { contents, loading } = useSelector((state) => state.content);
-
+  const [path,setPath] = useState(["your-collection"])
+  console.log(path)
   const [formData, setFormData] = useState({
     id: null,
     imageUrl: "",
@@ -24,8 +27,15 @@ const ContentManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(getContents());
+    dispatch(getContents())
+    // dispatch(getContentsWithLink(path))
   }, [dispatch]);
+
+  const HandleCollectionClick = (contentId) =>{
+    setPath([...path, contentId])
+    dispatch(setContentsNULL())
+    dispatch(getContentsWithLink(path))
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -90,7 +100,6 @@ const ContentManagement = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
-
   const sortedContents = [...contents].sort((a, b) => a.order - b.order);
 
   return (
@@ -102,6 +111,7 @@ const ContentManagement = () => {
             className="content_collections"
             key={index}
             whileHover={{ scale: 1.05 }}
+            onClick={()=>HandleCollectionClick(content.id)}
           >
             {/* Display project thumbnail */}
             <Avatar

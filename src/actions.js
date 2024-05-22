@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 export const getContents = () => async (dispatch) => {
   const snapshot = await getDocs(collection(db, 'your-collection'));
@@ -13,29 +13,52 @@ export const getContents = () => async (dispatch) => {
     payload: contents,
   });
 
-  // const getSubcollections = async (docRef) => {
-  //   const subcollections = {};
-  //   const collectionsSnapshot = await listCollections(docRef);
-  //   for (const subcollectionRef of collectionsSnapshot) {
-  //     const subcollectionName = subcollectionRef.id;
-  //     const subcollectionDocsSnapshot = await getDocs(
-  //       collection(docRef, subcollectionName)
-  //     );
-  //     const subcollectionDocs = subcollectionDocsSnapshot.docs.map((doc) => ({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //     }));
-  //     subcollections[subcollectionName] = subcollectionDocs;
+};
+export const setContentsNULL = ()=>async(dispatch)=>{
+  dispatch({
+    type:'SET_NULL',
+    payload:null
 
-  //     for (const subDoc of subcollectionDocsSnapshot.docs) {
-  //       const subDocRef = doc(db, subcollectionName, subDoc.id);
-  //       subcollections[subcollectionName][subDoc.id] = await getSubcollections(
-  //         subDocRef
-  //       );
-  //     }
-  //   }
-  //   return subcollections;
-  // };
+  })
+};
+
+export const getContentsWithLink = (pathArray) => async (dispatch) => {
+  try {
+    console.log(pathArray)
+    if (!pathArray || pathArray.length < 1) {
+      console.warn('Invalid path array: must contain at least one element');
+      return; 
+    }
+    let ref = collection(db, pathArray[0]);
+
+    for (let i = 1; i < pathArray.length; i += 2) {
+      const subcollectionName = pathArray[i];
+      const docId = pathArray[i + 1];
+      if (docId) {
+        ref = query(collection(ref, subcollectionName), where('id', '==', docId)); 
+      } else {
+        ref = collection(ref, subcollectionName); 
+      }
+    }
+
+    const snapshot = await getDocs(ref);
+
+    if (snapshot.empty) {
+      console.warn(`No document found at path: ${pathArray.join('/')}`);
+      return; 
+    }
+    const content = snapshot.docs[0].data();
+    dispatch({
+      type: 'GET_CONTENTS',
+      payload: content,
+    });
+  } catch (error) {
+    console.error('Error fetching content:', error);
+    dispatch({
+      type: 'GET_CONTENTS',
+      payload: null, // Dispatch null on error
+    });
+  }
 };
 
 export const addContent = (content) => async (dispatch) => {

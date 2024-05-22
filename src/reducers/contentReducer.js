@@ -11,6 +11,11 @@ const initialState = {
           contents: action.payload,
           loading: false,
         };
+        case 'SET_NULL':
+          return{
+            contents:[],
+            loading:false
+          }
       case 'ADD_CONTENT':
         return {
           ...state,
