@@ -1,13 +1,5 @@
-// src/actions.js
-import { db } from "./firebaseConfig";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { db } from './firebaseConfig';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
 export const getContents = () => async (dispatch) => {
   const snapshot = await getDocs(collection(db, 'your-collection'));
