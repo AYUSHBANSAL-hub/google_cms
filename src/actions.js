@@ -4,7 +4,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase
 export const getContents = () => async (dispatch) => {
   const snapshot = await getDocs(collection(db, 'your-collection'));
   const subcollectionNames = snapshot.docs.map(doc=>doc.id)
-  const hasTest = subcollectionNames.filter(name => name.includes('ALJ'));
+  const hasTest = subcollectionNames.filter(name => name.startsWith('test_'));
   console.log(hasTest)
   const contents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   console.log(contents)
