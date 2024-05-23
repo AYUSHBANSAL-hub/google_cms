@@ -11,13 +11,12 @@ import {
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./ContentManagement.css";
 import Avatar from "react-avatar";
-import {motion} from "framer-motion";
+import { motion } from "framer-motion";
 
 const ContentManagement = () => {
   const dispatch = useDispatch();
   const { contents, loading } = useSelector((state) => state.content);
-  const [path,setPath] = useState(["your-collection"])
-  console.log(path)
+  const [path, setPath] = useState(["your-collection"]);
   const [formData, setFormData] = useState({
     id: null,
     imageUrl: "",
@@ -31,11 +30,14 @@ const ContentManagement = () => {
     // dispatch(getContentsWithLink(path))
   }, [dispatch]);
 
-  const HandleCollectionClick = (contentId) =>{
-    setPath([...path, contentId])
-    dispatch(setContentsNULL())
-    dispatch(getContentsWithLink(path))
-  }
+  const handleCollectionClick = (contentId) => {
+    const newPath = [...path, contentId];
+    setPath(newPath);
+    dispatch(setContentsNULL());
+    dispatch(getContentsWithLink(newPath)).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -48,7 +50,7 @@ const ContentManagement = () => {
     const newContent = {
       imageUrl: formData.imageUrl,
       link: formData.link,
-      order: contents.length,
+      order: contents ? contents.length : 0,
       route: formData.route,
     };
     dispatch(addContent(newContent));
@@ -100,29 +102,33 @@ const ContentManagement = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  if (!contents || !Array.isArray(contents)) {
+    return <div>Error fetching data.</div>;
+  }
+
   const sortedContents = [...contents].sort((a, b) => a.order - b.order);
 
   return (
     <div className="content-management">
       <h1 className="title">Content Management</h1>
       <div className="grid_box">
-        {contents?.map((content, index) => (
+        {sortedContents.map((content, index) => (
           <motion.div
             className="content_collections"
             key={index}
             whileHover={{ scale: 1.05 }}
-            onClick={()=>HandleCollectionClick(content.id)}
+            onClick={() => handleCollectionClick(content.id)}
           >
-            {/* Display project thumbnail */}
             <Avatar
               className="avatar"
               name={content.id}
-              size="100" // Adjust size as needed
-              round={true} // Make it round
-              style={{ backgroundColor: "#333" }} // Background color
+              size="100"
+              round={true}
+              style={{ backgroundColor: "#333" }}
             />
-            <div >
-              <p style={{color:"black", fontFamily:"bold"}}>{content.id}</p>
+            <div>
+              <p style={{ color: "black", fontFamily: "bold" }}>{content.id}</p>
             </div>
           </motion.div>
         ))}
