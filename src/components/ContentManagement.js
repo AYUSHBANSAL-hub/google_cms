@@ -30,7 +30,7 @@ const ContentManagement = () => {
   }, [dispatch]);
 
   const handleCollectionClick = (contentId) => {
-    const newPath = [...path, contentId];
+    const newPath = [...path, contentId,'testing1'];
     setPath(newPath);
     dispatch(setContentsNULL());
     dispatch(getContentsWithLink(newPath)).catch((error) => {

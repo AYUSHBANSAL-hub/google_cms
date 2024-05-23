@@ -1,6 +1,6 @@
 import { db } from './firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
-
+ 
 export const getContents = () => async (dispatch) => {
   const snapshot = await getDocs(collection(db, 'your-collection'));
   const subcollectionNames = snapshot.docs.map(doc => doc.id);
@@ -13,20 +13,20 @@ export const getContents = () => async (dispatch) => {
     payload: contents,
   });
 };
-
+ 
 export const setContentsNULL = () => async (dispatch) => {
   dispatch({
     type: 'SET_NULL',
     payload: null,
   });
 };
-
+ 
 export const getContentsWithLink = (pathArray) => async (dispatch) => {
   try {
     console.log(pathArray); // Log the path array to ensure it's correct
 
-    if (!pathArray || pathArray.length < 1) {
-      console.warn('Invalid path array: must contain at least one element');
+    if (!pathArray || pathArray.length < 2) {
+      console.warn('Invalid path array: must contain at least a collection and document ID');
       return;
     }
 
@@ -40,22 +40,22 @@ export const getContentsWithLink = (pathArray) => async (dispatch) => {
       }
     }
 
-    // Check if the final ref is a document or a collection
+    // Check if the final ref is a collection
     let contents;
-    if (ref.type === 'document') {
-      const docSnapshot = await getDoc(ref);
-      if (!docSnapshot.exists()) {
-        console.warn(`No document found at path: ${pathArray.join('/')}`);
-        return;
-      }
-      contents = [{ id: docSnapshot.id, ...docSnapshot.data() }];
-    } else {
+    if (ref.type === 'collection') {
       const snapshot = await getDocs(ref);
       if (snapshot.empty) {
         console.warn(`No documents found at path: ${pathArray.join('/')}`);
         return;
       }
       contents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } else {
+      const docSnapshot = await getDoc(ref);
+      if (!docSnapshot.exists()) {
+        console.warn(`No document found at path: ${pathArray.join('/')}`);
+        return;
+      }
+      contents = [{ id: docSnapshot.id, ...docSnapshot.data() }];
     }
 
     dispatch({
@@ -70,8 +70,7 @@ export const getContentsWithLink = (pathArray) => async (dispatch) => {
     });
   }
 };
-
-
+ 
 export const addContent = (content) => async (dispatch) => {
   const docRef = await addDoc(collection(db, "your-collection"), content);
   dispatch({
@@ -79,7 +78,7 @@ export const addContent = (content) => async (dispatch) => {
     payload: { id: docRef.id, ...content },
   });
 };
-
+ 
 export const updateContent = (id, content) => async (dispatch) => {
   const docRef = doc(db, "your-collection", id);
   await updateDoc(docRef, content);
@@ -88,7 +87,7 @@ export const updateContent = (id, content) => async (dispatch) => {
     payload: { id, ...content },
   });
 };
-
+ 
 export const deleteContent = (id) => async (dispatch) => {
   const docRef = doc(db, "your-collection", id);
   await deleteDoc(docRef);
