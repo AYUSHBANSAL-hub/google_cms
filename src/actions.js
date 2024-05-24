@@ -75,17 +75,17 @@ export const getContentsWithLink = (documentName) => async (dispatch) => {
       console.log(ParentDocName);
       const response = await axios.get(apiUrl);
       const keysWithCA = Object.keys(response.data)
-        .filter(key => key.includes(`${documentName}`))
-        .map(key => ({ id: key }));
-
-      
-      
-      console.log(keysWithCA);
-      ParentDocName="/"+ParentDocName;
-      keysWithCA.forEach(item => {
-        ParentDocName += item.id;
-      });
-      console.log(ParentDocName)
+      .filter(key => key.includes(`${documentName}`))
+      .map(key => ({ id: key }));
+    
+    console.log(keysWithCA);
+    
+    if (keysWithCA.length === 1) {
+      ParentDocName += keysWithCA[0].id; // Access the id from the first item
+    }
+    
+    console.log(ParentDocName);
+    
       
       if (documentName == keysWithCA[0]?.id && keysWithCA.length == 1) {
         const contestData = response.data[keysWithCA[0].id];
@@ -129,7 +129,7 @@ export const updateContent = (content) => async (dispatch) => {
     
     dispatch({
       type: "UPDATE_CONTENT",
-      payload: content, // Assuming you want to update the Redux state with the updated content
+      payload: content, 
     });
   } catch (error) {
     console.error("Error updating content:", error);
