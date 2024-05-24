@@ -26,14 +26,13 @@ const contentReducer = (state = initialState, action) => {
         contents: [...state.contents, action.payload],
         error: null,
       };
-    case 'UPDATE_CONTENT':
-      return {
-        ...state,
-        contents: state.contents.map(content =>
-          content.id === action.payload.id ? action.payload : content
-        ),
-        error: null,
-      };
+      case 'UPDATE_CONTENT':
+        return {
+          ...state,
+          contents: action.payload, // Replace contents array with updated content
+          error: null,
+        };
+      
     case 'DELETE_CONTENT':
       return {
         ...state,

@@ -11,34 +11,40 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./ContentManagement.css";
 import Avatar from "react-avatar";
 import { motion } from "framer-motion";
+import { isContentEditable } from "@testing-library/user-event/dist/utils";
 
 const ContentManagement = () => {
   const dispatch = useDispatch();
   const { contents, loading, error } = useSelector((state) => state.content);
   const [formData, setFormData] = useState({
     id: null,
+    contestId: "",
     imageUrl: "",
-    link: "",
+    isRsaFacing:"",
     order: "",
-    route: "",
+    route:"",
+    visibility:"",
+    webviewURL:""
+    
   });
   const [contestData, setContestData] = useState(null); // State to store contest data
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     dispatch(getContents());
   }, [dispatch]);
 
 
-  useEffect(() => {
-    const storedData = localStorage.getItem("currentContent");
-    if (storedData) {
-      try {
-        setContestData(JSON.parse(storedData));
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedData = localStorage.getItem("currentContent");
+  //   if (storedData) {
+  //     try {
+  //       setContestData(JSON.parse(storedData));
+  //     } catch (error) {
+  //       console.error("Error parsing JSON:", error);
+  //     }
+  //   }
+  // }, []);
 
   const handleCollectionClick = async (contentId) => {
     try {
@@ -56,27 +62,42 @@ const ContentManagement = () => {
       [e.target.name]: e.target.value,
     });
   };
+  
 
   const handleAdd = () => {
     const newContent = {
       imageUrl: formData.imageUrl,
-      link: formData.link,
       order: contents ? contents.length : 0,
-      route: formData.route,
     };
     dispatch(addContent(newContent));
-    setFormData({ id: null, imageUrl: "", link: "", order: "", route: "" });
+    setFormData({  id: null,
+      contestId: "",
+      imageUrl: "",
+      isRsaFacing:"",
+      order: "",
+      route:"",
+      visibility:"",
+      webviewURL:"" });
   };
 
   const handleUpdate = () => {
     const updatedContent = {
       imageUrl: formData.imageUrl,
-      link: formData.link,
       order: Number(formData.order),
-      route: formData.route,
+      isRsaFacing:formData.isRsaFacing,
+      route:formData.route,
+      visibility:formData.visibility,
+      webviewURL:formData.webviewURL
     };
-    dispatch(updateContent(formData.id, updatedContent));
-    setFormData({ id: null, imageUrl: "", link: "", order: "", route: "" });
+    dispatch(updateContent(updatedContent));
+    setFormData({  id: null,
+      contestId: "",
+      imageUrl: "",
+      isRsaFacing:"",
+      order: "",
+      route:"",
+      visibility:"",
+      webviewURL:""});
   };
 
   const handleEditClick = (content) => {
@@ -132,6 +153,7 @@ const ContentManagement = () => {
   const emptyDocuments = sortedContents.filter((content) => !content.imageUrl && !content.link);
 
   // Render only the contest data if available
+  console.log(contestData);
   if (contestData) {
     return (
       <div className="contest-data">
@@ -147,7 +169,66 @@ const ContentManagement = () => {
           ))}
         </ul>
         <button onClick={handleBackClick}>Go Back</button>
+        <div className="input-section">
+        <input
+          type="text"
+          name="imageUrl"
+          placeholder="Image URL"
+          value={formData.imageUrl}
+          onChange={handleChange}
+        />
+        
+        <input
+          type="number"
+          name="order"
+          placeholder="Order"
+          value={formData.order}
+          onChange={handleChange}
+        />
+         <input
+          type="number"
+          name="contestId"
+          placeholder="contestId"
+          value={formData.contestId}
+          onChange={handleChange}
+        />
+         <input
+          type="text"
+          name="isRsaFacing"
+          placeholder="isRsaFacing"
+          value={formData.isRsaFacing}
+          onChange={handleChange}
+        />
+         <input
+          type="text"
+          name="route"
+          placeholder="route"
+          value={formData.route}
+          onChange={handleChange}
+        />
+         <input
+          type="boolean"
+          name="visibility"
+          placeholder="visibility"
+          value={formData.visibility}
+          onChange={handleChange}
+        />
+         <input
+          type="text"
+          name="webviewURL"
+          placeholder="webviewURL"
+          value={formData.webviewURL}
+          onChange={handleChange}
+        />
+       
+       
+          <button className="update-button" onClick={handleUpdate}>
+            Update Content
+          </button>
+       
       </div>
+      </div>
+      
     );
   }
 
