@@ -5,7 +5,6 @@ import {
   addContent,
   updateContent,
   deleteContent,
-  setContentsNULL,
   getContentsWithLink,
 } from "../actions";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -15,8 +14,7 @@ import { motion } from "framer-motion";
 
 const ContentManagement = () => {
   const dispatch = useDispatch();
-  const { contents, loading } = useSelector((state) => state.content);
-  const [path, setPath] = useState(["your-collection"]);
+  const { contents, loading, error } = useSelector((state) => state.content);
   const [formData, setFormData] = useState({
     id: null,
     imageUrl: "",
@@ -24,18 +22,32 @@ const ContentManagement = () => {
     order: "",
     route: "",
   });
+  const [contestData, setContestData] = useState(null); // State to store contest data
 
   useEffect(() => {
     dispatch(getContents());
   }, [dispatch]);
 
-  const handleCollectionClick = (contentId) => {
-    const newPath = [...path, contentId,'testing1'];
-    setPath(newPath);
-    dispatch(setContentsNULL());
-    dispatch(getContentsWithLink(newPath)).catch((error) => {
+
+  useEffect(() => {
+    const storedData = localStorage.getItem("currentContent");
+    if (storedData) {
+      try {
+        setContestData(JSON.parse(storedData));
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    }
+  }, []);
+
+  const handleCollectionClick = async (contentId) => {
+    try {
+      const data = await dispatch(getContentsWithLink(contentId));
+      localStorage.setItem("currentContent", JSON.stringify(data));
+      setContestData(data); // Set contest data when collection is clicked
+    } catch (error) {
       console.error("Error fetching data:", error);
-    });
+    }
   };
 
   const handleChange = (e) => {
@@ -76,6 +88,10 @@ const ContentManagement = () => {
       route: content.route,
     });
   };
+  const handleBackClick = () => {
+    localStorage.removeItem("currentContent");
+    setContestData(null);
+  };
 
   const handleDelete = (id) => {
     dispatch(deleteContent(id));
@@ -102,17 +118,45 @@ const ContentManagement = () => {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   if (!contents || !Array.isArray(contents)) {
-    return <div>Error fetching data.</div>;
+    return <div>No contents available.</div>;
   }
 
   const sortedContents = [...contents].sort((a, b) => a.order - b.order);
+
+  // Filter out the empty documents
+  const emptyDocuments = sortedContents.filter((content) => !content.imageUrl && !content.link);
+
+  // Render only the contest data if available
+  if (contestData) {
+    return (
+      <div className="contest-data">
+        <h2>Contest Data</h2>
+        {contestData.imageUrl && (
+          <img src={contestData.imageUrl} alt="Contest" style={{ maxWidth: '100%' }} />
+        )}
+        <ul>
+          {Object.entries(contestData).map(([key, value]) => (
+            <li key={key}>
+              <strong>{key}:</strong> {value}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleBackClick}>Go Back</button>
+      </div>
+    );
+  }
 
   return (
     <div className="content-management">
       <h1 className="title">Content Management</h1>
       <div className="grid_box">
-        {sortedContents.map((content, index) => (
+        {/* Render the empty documents */}
+        {emptyDocuments.map((content, index) => (
           <motion.div
             className="content_collections"
             key={index}
@@ -171,7 +215,6 @@ const ContentManagement = () => {
           </button>
         )}
       </div>
-
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <Droppable droppableId="contents" direction="horizontal">
           {(provided) => (
