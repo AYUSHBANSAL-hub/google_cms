@@ -8,7 +8,8 @@ const hardcodedDocumentNames = [
 'test-knowledge-centre-articles',
 'test-knowledge-centre-carousels',
 'test-knowledge-centre-posts',
-'test-store-hub-page'
+'test-store-hub-page',
+'test-collection'
 ];
 export const getContents = () => async (dispatch) => {
   try {
@@ -19,7 +20,8 @@ export const getContents = () => async (dispatch) => {
       'test-knowledge-centre-articles',
       'test-knowledge-centre-carousels',
       'test-knowledge-centre-posts',
-      'test-store-hub-page'
+      'test-store-hub-page',
+      'test-collection'
     ];
 
     const contents = hardcodedDocumentNames.map(name => ({ id: name }));
@@ -45,6 +47,7 @@ export const getContentsWithLink = (documentName) => async (dispatch) => {
     if (hardcodedDocumentNames.includes(documentName)) {
       console.log('hello');
       const apiUrl = `https://cms-data.testexperience.site/fetch/${documentName}`;
+     console.log(documentName);
       ParentDocName = documentName;
 
       const response = await axios.get(apiUrl);
@@ -81,7 +84,7 @@ export const getContentsWithLink = (documentName) => async (dispatch) => {
     console.log(keysWithCA);
     
     if (keysWithCA.length === 1) {
-      ParentDocName += keysWithCA[0].id; // Access the id from the first item
+      ParentDocName = ParentDocName + "/"  +keysWithCA[0].id; // Access the id from the first item
     }
     
     console.log(ParentDocName);

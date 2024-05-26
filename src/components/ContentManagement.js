@@ -11,11 +11,14 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./ContentManagement.css";
 import Avatar from "react-avatar";
 import { motion } from "framer-motion";
-import { isContentEditable } from "@testing-library/user-event/dist/utils";
+import AddFieldModal from "./AddFieldModal";
+
 
 const ContentManagement = () => {
   const dispatch = useDispatch();
   const { contents, loading, error } = useSelector((state) => state.content);
+  const [showModal, setShowModal] = useState(false);
+
   const [formData, setFormData] = useState({
     id: null,
     contestId: "",
@@ -24,91 +27,135 @@ const ContentManagement = () => {
     order: "",
     route:"",
     visibility:"",
-    webviewURL:""
-    
+    webviewURL:"",
+    type:"",
+    knowledgeId:"",
+    link:"",
   });
-  const [contestData, setContestData] = useState(null); // State to store contest data
-  const [editMode, setEditMode] = useState(false);
+  const [contestData, setContestData] = useState(null);
+  const [newField, setNewField] = useState({
+    name: "",
+    value: ""
+  });
+  useEffect(() => {
+    if (contestData) {
+      console.log(contestData);
+      setFormData({
+        id: contestData.id,
+        contestId: contestData.contestId,
+        imageUrl: contestData.imageUrl,
+        isRsaFacing: contestData.isRsaFacing,
+        order: contestData.order,
+        route: contestData.route,
+        visibility: contestData.visibility,
+        webviewURL: contestData.webviewURL,
+        type:contestData.type,
+        knowledgeId:contestData.knowledgeId,
+        link:contestData.link
+      });
+    }
+  }, [contestData]);
 
   useEffect(() => {
     dispatch(getContents());
   }, [dispatch]);
 
-
-  // useEffect(() => {
-  //   const storedData = localStorage.getItem("currentContent");
-  //   if (storedData) {
-  //     try {
-  //       setContestData(JSON.parse(storedData));
-  //     } catch (error) {
-  //       console.error("Error parsing JSON:", error);
-  //     }
-  //   }
-  // }, []);
-
   const handleCollectionClick = async (contentId) => {
     try {
       const data = await dispatch(getContentsWithLink(contentId));
       localStorage.setItem("currentContent", JSON.stringify(data));
-      setContestData(data); // Set contest data when collection is clicked
+      setContestData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
   const handleChange = (e) => {
+    const { name, type, value, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
-  
+  const handleAddField = (fieldName, fieldValue) => {
+    setContestData({ ...contestData, [fieldName]: fieldValue });
+  };
+  // const handleAddField = () => {
+  //   const updatedContestData = { ...contestData };
+  //   updatedContestData[newField.name] = newField.value;
+  //   setContestData(updatedContestData);
 
+  //   setFormData({
+  //     ...formData,
+  //     [newField.name]: newField.value
+  //   });
+
+  //   setNewField({
+  //     name: "",
+  //     value: ""
+  //   });
+  // };
   const handleAdd = () => {
     const newContent = {
+      contentsId: formData.contestId,
       imageUrl: formData.imageUrl,
       order: contents ? contents.length : 0,
+      isRsaFacing: formData.isRsaFacing,
+      route: formData.route,
+      visibility: formData.visibility,
+      webviewURL: formData.webviewURL
     };
     dispatch(addContent(newContent));
-    setFormData({  id: null,
+    setFormData({
+      id: null,
       contestId: "",
       imageUrl: "",
       isRsaFacing:"",
       order: "",
       route:"",
       visibility:"",
-      webviewURL:"" });
+      webviewURL:""
+    });
   };
 
   const handleUpdate = () => {
     const updatedContent = {
+      contestId: formData.contestId,
       imageUrl: formData.imageUrl,
       order: Number(formData.order),
-      isRsaFacing:formData.isRsaFacing,
-      route:formData.route,
-      visibility:formData.visibility,
-      webviewURL:formData.webviewURL
+      isRsaFacing: formData.isRsaFacing,
+      route: formData.route,
+      visibility: formData.visibility,
+      webviewURL: formData.webviewURL
     };
     dispatch(updateContent(updatedContent));
-    setFormData({  id: null,
+    setFormData({
+      id: null,
       contestId: "",
       imageUrl: "",
       isRsaFacing:"",
       order: "",
       route:"",
       visibility:"",
-      webviewURL:""});
+      webviewURL:""
+    });
   };
 
   const handleEditClick = (content) => {
-    setFormData({
-      id: content.id,
-      imageUrl: content.imageUrl,
-      link: content.link,
-      order: content.order,
-      route: content.route,
+    const keys = Object.keys(content);
+    
+    const updatedFormData = {};
+  
+    keys.forEach((key) => {
+      updatedFormData[key] = content[key];
     });
+
+    console.log(updatedFormData)
+    setFormData(updatedFormData);
+
   };
+  
+
   const handleBackClick = () => {
     localStorage.removeItem("currentContent");
     setContestData(null);
@@ -131,8 +178,21 @@ const ContentManagement = () => {
     });
 
     reorderedContents.forEach((content, index) => {
-      dispatch(updateContent(content.id, { ...content, order: index }));
+      dispatch(updateContent({ ...content, order: index }));
     });
+  };
+
+  const getInputType = (value) => {
+    switch (typeof value) {
+      case 'string':
+        return 'text';
+      case 'number':
+        return 'number';
+      case 'boolean':
+        return 'checkbox';
+      default:
+        return 'text';
+    }
   };
 
   if (loading) {
@@ -149,10 +209,8 @@ const ContentManagement = () => {
 
   const sortedContents = [...contents].sort((a, b) => a.order - b.order);
 
-  // Filter out the empty documents
   const emptyDocuments = sortedContents.filter((content) => !content.imageUrl && !content.link);
 
-  // Render only the contest data if available
   console.log(contestData);
   if (contestData) {
     return (
@@ -164,71 +222,37 @@ const ContentManagement = () => {
         <ul>
           {Object.entries(contestData).map(([key, value]) => (
             <li key={key}>
-              <strong>{key}:</strong> {value}
+              <strong>{key}:</strong> {String(value)}
             </li>
           ))}
         </ul>
+        <div>
+          {/* Add Field button */}
+          {/* <button onClick={() => setShowModal(true)}>Add Field</button>
+        <AddFieldModal 
+          showModal={showModal} 
+          onClose={() => setShowModal(false)} 
+          onAddField={handleAddField} 
+        /> */}
+        </div>
         <button onClick={handleBackClick}>Go Back</button>
         <div className="input-section">
-        <input
-          type="text"
-          name="imageUrl"
-          placeholder="Image URL"
-          value={formData.imageUrl}
-          onChange={handleChange}
-        />
-        
-        <input
-          type="number"
-          name="order"
-          placeholder="Order"
-          value={formData.order}
-          onChange={handleChange}
-        />
-         <input
-          type="number"
-          name="contestId"
-          placeholder="contestId"
-          value={formData.contestId}
-          onChange={handleChange}
-        />
-         <input
-          type="text"
-          name="isRsaFacing"
-          placeholder="isRsaFacing"
-          value={formData.isRsaFacing}
-          onChange={handleChange}
-        />
-         <input
-          type="text"
-          name="route"
-          placeholder="route"
-          value={formData.route}
-          onChange={handleChange}
-        />
-         <input
-          type="boolean"
-          name="visibility"
-          placeholder="visibility"
-          value={formData.visibility}
-          onChange={handleChange}
-        />
-         <input
-          type="text"
-          name="webviewURL"
-          placeholder="webviewURL"
-          value={formData.webviewURL}
-          onChange={handleChange}
-        />
-       
-       
+          {Object.entries(contestData).map(([key, value]) => (
+            <input
+              key={key}
+              type={getInputType(value)}
+              name={key}
+              placeholder={key}
+              value={typeof value === 'boolean' ? undefined : formData[key] || ""}
+              checked={typeof value === 'boolean' ? formData[key] || false : undefined}
+              onChange={handleChange}
+            />
+          ))}
           <button className="update-button" onClick={handleUpdate}>
             Update Content
           </button>
-       
+        </div>
       </div>
-      </div>
-      
     );
   }
 
@@ -236,7 +260,6 @@ const ContentManagement = () => {
     <div className="content-management">
       <h1 className="title">Content Management</h1>
       <div className="grid_box">
-        {/* Render the empty documents */}
         {emptyDocuments.map((content, index) => (
           <motion.div
             className="content_collections"
@@ -258,34 +281,17 @@ const ContentManagement = () => {
         ))}
       </div>
       <div className="input-section">
-        <input
-          type="text"
-          name="imageUrl"
-          placeholder="Image URL"
-          value={formData.imageUrl}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="link"
-          placeholder="Link"
-          value={formData.link}
-          onChange={handleChange}
-        />
-        <input
-          type="number"
-          name="order"
-          placeholder="Order"
-          value={formData.order}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="route"
-          placeholder="Route"
-          value={formData.route}
-          onChange={handleChange}
-        />
+        {Object.entries(formData).map(([key, value]) => (
+          <input
+            key={key}
+            type={getInputType(value)}
+            name={key}
+            placeholder={key}
+            value={typeof value === 'boolean' ? undefined : formData[key] || ""}
+            checked={typeof value === 'boolean' ? formData[key] || false : undefined}
+            onChange={handleChange}
+          />
+        ))}
         {formData.id ? (
           <button className="update-button" onClick={handleUpdate}>
             Update Content
@@ -347,3 +353,4 @@ const ContentManagement = () => {
 };
 
 export default ContentManagement;
+
